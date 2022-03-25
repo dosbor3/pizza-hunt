@@ -18,6 +18,12 @@ const pizzaController = {
     //get all pizzas
     getAllPizza(req, res) {
         Pizza.find({})
+        .populate({ //equivalent to sequelize's join method to display the foreign key's information
+            path: 'comments',
+            select: '-__v' //retrieve the comments, but ignore the v field
+        })
+        .select('-__v') //to ignore the pizza's __v field
+        .sort({ _id: -1 })
         .then(dbPizzaData => res.json(dbPizzaData))
         .catch(err => {
             console.log(err);
@@ -27,6 +33,11 @@ const pizzaController = {
     //get one pizza by id
     getPizzaById({params}, res) {
         Pizza.findOne({_id: params.id})
+        .populate({
+            path: 'comments',
+            select: '-__v'
+        })
+        .select('-__v')
         .then(dbPizzaData => {
             //if no pizza is found, send 404
             if(!dbPizzaData) {
@@ -60,6 +71,7 @@ const pizzaController = {
         .catch(err => res.status(400).json(err));
     },
 
+    //remove
     deletePizza({params}, res) {
         Pizza.findOneAndDelete({_id: params.id })
         .then(dbPizzaData => {
